@@ -118,7 +118,6 @@ type Scanner interface {
 **DB-Update**
 ```
 trivy image --download-db-only      --cache-dir /data/trivy
-trivy image --download-java-db-only --cache-dir /data/trivy   # wenn BILGE_JAVA_DB
 trivy version --format json --cache-dir /data/trivy           # → DBInfo
 ```
 
@@ -130,13 +129,13 @@ trivy image
   --format json
   --quiet
   --skip-db-update
-  --skip-java-db-update
   --cache-dir /data/trivy
   --timeout <BILGE_SCAN_TIMEOUT>
   <imageRef>
 ```
 
 - Aufruf über `exec.CommandContext` mit Argument-Liste (NF-SEC-6), Timeout per Context (F-SCAN-3). Trivy hat zusätzlich ein eigenes Standard-Timeout von 5 min; `--timeout` wird deshalb auf denselben Wert gesetzt, sonst bricht Trivy große Images auf dem Pi vorzeitig ab.
+- `--skip-java-db-update` wird bewusst **nicht** gesetzt: Trivy lädt die Java-DB beim ersten Java-Image selbst und aktualisiert sie danach eigenständig (SPEC F-DB-2). Dieser erste Scan dauert dadurch ca. 2 Minuten länger. Offen für Phase 1.4: Wie oft lädt Trivy die Java-DB neu, und wie groß ist der Download?
 - Docker-Endpunkte, die Trivy über den Proxy aufruft (Spike auf dem Pi bestätigt): `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history`, `GET /images/get`. Alle fallen unter `IMAGES=1` bzw. die Proxy-Standards.
 - Umgebung: `DOCKER_HOST` durchreichen, optional `GOMEMLIMIT` (einziges wirksames Speicherlimit: Raspberry Pi OS schaltet den Memory-Controller der cgroups ab, `mem_limit` in Compose greift dort nicht), `TMPDIR=/data/tmp` (Trivy schreibt beim Image-Export temporäre Dateien; diese sollen auf das Volume, nicht in RAM/tmpfs).
 - Niedrige Priorität per `syscall.Setpriority` direkt nach dem Start des Prozesses (das distroless-Image enthält kein `nice`-Binary).
@@ -380,6 +379,6 @@ Der Proxy hängt **nur** am internen Netz (NF-SEC-2). bilge braucht zusätzlich 
 |---|---|
 | Trivy braucht über den Proxy mehr Endpunkte als erwartet | Spike in Phase 0, bevor Code entsteht |
 | Trivy-Speicherspitzen auf dem Pi (OOM) | Gemessen ≤ 260 MB, Risiko gering; sequenzielle Scans, `GOMEMLIMIT` |
-| Große Volumes durch Trivy- und Java-DB | Gemessen ca. 3 GB; im README dokumentieren |
+| Große Volumes durch Trivy- und Java-DB | Gemessen ca. 3 GB; Java-DB nur bei Java-Images (SPEC F-DB-2); im README dokumentieren |
 | Änderungen im Trivy-JSON-Format | Trivy-Version im Dockerfile pinnen, Parser-Fixtures bei Upgrade erneuern |
 | Dashboard versehentlich öffentlich | Deutlicher Hinweis im README, Reverse-Proxy-Beispiel |

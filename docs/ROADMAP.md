@@ -36,7 +36,7 @@ Werkzeug und Anleitung: [`spike/README.md`](../spike/README.md). Ergebnisse: [`s
 - [x] Auf dem Pi: `docker-socket-proxy` mit `IMAGES=1`, `POST=0` im internen Netz, daneben ein Container mit `trivy`.
 - [x] `trivy image --image-src docker` gegen ein Image per Tag **und** per Image-ID testen.
 - [x] Proxy-Logs prüfen: Welche Endpunkte ruft Trivy auf? Werden welche verweigert?
-- [x] Verhalten mit `--skip-java-db-update` ohne vorhandene Java-DB. (Scan bricht ab; Entscheidung zu `BILGE_JAVA_DB` offen.)
+- [x] Verhalten mit `--skip-java-db-update` ohne vorhandene Java-DB. (Scan bricht ab; daher lädt Trivy die Java-DB bei Bedarf, SPEC F-DB-2.)
 - [x] Messen für 4 typische Images (Alpine, Debian, Node, Java): RAM-Spitze, Dauer, Größe des Caches; zweiter Scan desselben Images zum Vergleich.
 - [x] Echte Trivy-JSON-Reports als Fixtures sichern. (lokal in `spike/pi-results/`, Auswahl in spike-results.md)
 
@@ -61,7 +61,7 @@ Werkzeug und Anleitung: [`spike/README.md`](../spike/README.md). Ergebnisse: [`s
 - [ ] **1.1 `config`** – Env-Variablen laut SPEC §8 parsen und validieren; Tests für gültige/ungültige Werte; maskierte Ausgabe.
 - [ ] **1.2 `store`** – Verbindung, Migrations-Mechanismus, `0001_init.sql` laut ARCHITECTURE §5; Basis-Queries für Runs, Images, Scans, Findings.
 - [ ] **1.3 `docker`** – `ListImages` über `tcp://` und `unix://`; Normalisierung von `<none>:<none>`; Tests mit `httptest`.
-- [ ] **1.4 `trivy`** – Parser mit Fixtures aus 0.1 (nach `internal/trivy/testdata/` kopieren); `UpdateDB`, `Scan` mit Timeout, Prozessgruppe, Priorität, gekürztem stderr; Prüfung der `ImageID`.
+- [ ] **1.4 `trivy`** – Parser mit Fixtures aus 0.1 (nach `internal/trivy/testdata/` kopieren); Update-Verhalten und Downloadgröße der Java-DB messen; `UpdateDB`, `Scan` mit Timeout, Prozessgruppe, Priorität, gekürztem stderr; Prüfung der `ImageID`.
 - [ ] **1.5 `scan`** – Orchestrator nach SPEC §5 (ohne Benachrichtigung): Dedup nach Image-ID, sequenziell, Fehler pro Image isoliert, Ergebnisse sofort speichern, `running` → `aborted` beim Start; Tests mit Fakes.
 - [ ] **1.6 CLI** – `bilge run-once` führt einen Lauf aus und gibt eine Zusammenfassung aus.
 

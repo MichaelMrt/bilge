@@ -36,12 +36,13 @@ RAM = Spitze des Trivy-Prozesses (`Maximum resident set size`). Pro Trivy-Aufruf
 
 1. **Reicht der Proxy mit `IMAGES=1`?** Ja. Kein einziger Trivy-Aufruf wurde verweigert. Verweigert wurden nur die absichtlichen Gegenproben (`/info`, `/containers/json`, `/volumes`, `POST …/start`). Trivy nutzt ausschließlich `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history` und `GET /images/get`.
 2. **Image-ID als Scan-Ziel?** Ja, volle und kurze ID funktionieren. `Metadata.ImageID` stimmt in allen Reports mit der erwarteten ID überein; die Findings sind identisch zum Scan per Tag.
-3. **Ohne Java-DB?** **Scheitert.** Mit `--skip-java-db-update` und ohne vorhandene Java-DB bricht Trivy bei Images mit `.jar`-Dateien komplett ab (`FATAL … '--skip-java-db-update' cannot be specified on the first run`). Es gibt dann gar keinen Report, auch nicht für die OS-Pakete. `BILGE_JAVA_DB=false` lässt sich so nicht umsetzen → Entscheidung nötig (siehe unten).
+3. **Ohne Java-DB?** **Scheitert.** Mit `--skip-java-db-update` und ohne vorhandene Java-DB bricht Trivy bei Images mit `.jar`-Dateien komplett ab (`FATAL … '--skip-java-db-update' cannot be specified on the first run`). Es gibt dann gar keinen Report, auch nicht für die OS-Pakete. Ein abschaltbares `BILGE_JAVA_DB` lässt sich so nicht umsetzen.
 4. **RAM, Dauer, Volume auf dem Pi?** RAM-Spitze maximal 261 MB, Scans dauern Sekunden, das Volume braucht ca. 3 GB (beide DBs je 1,5 GB, Layer-Cache vernachlässigbar).
 5. **Spart der Layer-Cache?** Deutlich. Warme Scans dauern unter 1 s und brauchen weniger RAM. Das Proxy-Log zeigt **5** Image-Exporte (`/images/get`) für **17** Scans: nur die vier kalten Scans und der Scan mit separatem Cache haben exportiert. Ein unverändertes Image wird also bei täglichen Scans nicht erneut entpackt.
 
 ## Folgerungen
 
+- **Java-DB lädt Trivy bei Bedarf.** bilge lädt sie nicht selbst und setzt kein `--skip-java-db-update`; Trivy holt sie beim ersten Java-Image. `BILGE_JAVA_DB` entfällt (SPEC F-DB-2, E6).
 - **SBOM-Modus ist überflüssig.** Trivys Layer-Cache leistet bereits genau das, was der SBOM-Modus sparen sollte (SPEC E3). Er wird aus der Roadmap gestrichen.
 - **Hardware-Empfehlung senken.** 4 GB RAM sind nicht nötig; ein Pi mit 2 GB hat bei Trivy-Spitzen von ~260 MB viel Luft. 1 GB ist ungetestet.
 - **Container-Memory-Limits wirken auf Raspberry Pi OS nicht**, weil der Kernel den Memory-Controller standardmäßig abschaltet. `mem_limit` in Compose bringt also nichts; das Mittel der Wahl bleibt `GOMEMLIMIT` für den Trivy-Prozess.

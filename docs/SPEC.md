@@ -49,7 +49,7 @@ Der Name: Die Bilge ist der Ort im Schiff, an dem man nach Lecks schaut.
 ### 4.1 Trivy-Datenbank
 
 - **F-DB-1** bilge lädt die Trivy-Schwachstellen-Datenbank einmal pro Lauf herunter (vor den Scans) und cached sie im Daten-Volume.
-- **F-DB-2** Die Java-Datenbank (`trivy-java-db`) ist per Konfiguration zuschaltbar (Standard: an), weil sie viel Speicherplatz belegt.
+- **F-DB-2** Die Java-Datenbank (`trivy-java-db`) lädt bilge **nicht** selbst. Trivy holt sie automatisch beim ersten Scan eines Images mit `.jar`-Dateien und hält sie danach selbst aktuell. Hosts ohne Java-Images sparen so ca. 1,5 GB. Schlägt dieser Download fehl, scheitert der Scan des betroffenen Images (F-SCAN-3), nicht der Lauf.
 - **F-DB-3** Schlägt das Update fehl, aber eine gecachte DB existiert, wird mit der alten DB gescannt und eine Warnung protokolliert. Ohne gecachte DB wird der Lauf mit Fehler beendet.
 - **F-DB-4** Version und Stand (`UpdatedAt`) der verwendeten DB werden pro Lauf gespeichert und im Dashboard angezeigt.
 
@@ -166,7 +166,7 @@ Konsequenzen (gewollt):
 
 - **NF-RES-1** bilge selbst braucht im Leerlauf ≤ 30 MB RAM (Ziel: 10–20 MB).
 - **NF-RES-2** Während eines Scans darf Trivy kurzzeitig mehr Speicher nutzen; Gemessen: höchstens ca. 260 MB (Jenkins-Image, kalter Cache); Empfehlung daher Pi mit ≥ 2 GB RAM. Trivy läuft mit niedriger CPU-Priorität und optional mit `GOMEMLIMIT`. Temporäre Dateien landen auf dem Volume, nicht im RAM.
-- **NF-RES-3** Speicherbedarf des Volumes: Trivy-DB ca. 1,5 GB, Java-DB ca. 1,5 GB, Layer-Cache wenige MB; zusammen ca. 3 GB plus Reserve. Wird im README dokumentiert.
+- **NF-RES-3** Speicherbedarf des Volumes: Trivy-DB ca. 1,5 GB, Layer-Cache wenige MB; mit Java-Images zusätzlich Java-DB ca. 1,5 GB, zusammen ca. 3 GB plus Reserve. Wird im README dokumentiert.
 - **NF-PLAT-1** Container-Images für `linux/arm64` (primär) und `linux/amd64`.
 - **NF-PLAT-2** Ein einzelnes statisches Go-Binary ohne CGO, Frontend eingebettet.
 
@@ -191,7 +191,6 @@ Konsequenzen (gewollt):
 | `BILGE_SCAN_ON_FIRST_START` | `true` | Sofortiger Lauf bei leerer Datenbank |
 | `BILGE_SCAN_TIMEOUT` | `15m` | Timeout pro Image |
 | `BILGE_SKIP_DANGLING` | `true` | Ungetaggte Images überspringen |
-| `BILGE_JAVA_DB` | `true` | Java-DB herunterladen und nutzen |
 | `BILGE_TRIVY_DB_REPOSITORY` | (Trivy-Standard) | Alternatives DB-Repository/Mirror |
 | `BILGE_TRIVY_MEMLIMIT` | (leer) | `GOMEMLIMIT` für den Trivy-Prozess, z. B. `1GiB` |
 | `BILGE_RETENTION` | `720h` | Aufbewahrungsfrist für Läufe |
@@ -213,6 +212,7 @@ Ungültige Werte führen zu einem Fehler beim Start mit klarer Meldung, nicht zu
 | E3 | Scan direkt per Image, **kein SBOM-Modus** | Gemessen: Trivys Layer-Cache verhindert bereits den erneuten Export unveränderter Images; warme Scans dauern < 1 s. |
 | E4 | „Neu“ über Subjekte (`repo:tag`), nicht Image-ID | Verhindert erneute Meldungen bei jedem Image-Update mit gleicher Rest-CVE. |
 | E5 | Baseline-Lauf ohne Detail-Meldung | Vermeidet eine Flut von Discord-Nachrichten beim Einrichten. |
+| E6 | Java-DB lädt Trivy bei Bedarf, keine Option | Ohne Java-DB bricht Trivy bei Java-Images komplett ab (Spike); bei Bedarf laden spart Platz für Hosts ohne Java und braucht keine Konfiguration. |
 
 ## 10. Offene Punkte
 
@@ -220,10 +220,10 @@ Werden im Spike (Roadmap Phase 0, Werkzeug in `spike/`) geklärt:
 
 - [x] Funktioniert `trivy image --image-src docker` vollständig über den Proxy mit nur `IMAGES=1` (und den Proxy-Standards `PING`/`VERSION`)?
 - [x] Akzeptiert Trivy die Image-ID (`sha256:…`) als Scan-Ziel, oder muss ein Tag verwendet werden?
-- [ ] Verhalten von Trivy ohne Java-DB, wenn `BILGE_JAVA_DB=false`.
+- [x] Verhalten von Trivy ohne Java-DB.
 - [x] RAM-Spitze, Dauer und Volume-Größe auf dem Pi für typische Images (Alpine, Debian, Node, Java).
 - [x] Wie viel spart ein zweiter Scan desselben Images durch Trivys Layer-Cache? (Entscheidungsgrundlage für den SBOM-Modus.)
 
 **Ergebnis** (Pi 5, 2026-10-22, Details in [spike-results.md](spike-results.md)): Proxy mit `IMAGES=1` genügt; volle und kurze Image-ID funktionieren; RAM-Spitze ≤ 260 MB, Scans in Sekunden, Volume ca. 3 GB; ein warmer Cache verhindert erneute Image-Exporte.
 
-**Offen:** Ohne vorhandene Java-DB bricht Trivy bei Images mit `.jar`-Dateien komplett ab. `BILGE_JAVA_DB=false` (F-DB-2) ist so nicht umsetzbar; Entscheidung steht aus.
+Ohne vorhandene Java-DB und mit `--skip-java-db-update` bricht Trivy bei Images mit `.jar`-Dateien komplett ab. Deshalb lädt Trivy die Java-DB bei Bedarf selbst (F-DB-2, E6).
