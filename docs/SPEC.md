@@ -132,7 +132,7 @@ Trivy-Stufen: `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `UNKNOWN`. Sortierung in gena
 
 ### 6.2 Identität eines Findings
 
-Innerhalb eines Images ist ein Finding eindeutig durch **(CVE-ID, Paketname, installierte Version, Ziel)**. Findings, die Trivy mehrfach meldet, werden dedupliziert.
+Innerhalb eines Images ist ein Finding eindeutig durch **(CVE-ID, Paketname, installierte Version, Ziel, Paketpfad)**. Der Paketpfad ist nötig, weil Trivy z. B. alle Java-Findings unter dem Ziel `Java` zusammenfasst und erst `PkgPath` das betroffene `.jar` nennt. Findings, die Trivy mehrfach meldet, werden dedupliziert.
 
 ### 6.3 Aktueller Stand eines Images
 

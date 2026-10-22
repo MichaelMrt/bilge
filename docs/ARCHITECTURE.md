@@ -142,7 +142,8 @@ trivy image
 - Niedrige Priorität per `syscall.Setpriority` direkt nach dem Start des Prozesses (das distroless-Image enthält kein `nice`-Binary).
 - Beim Abbruch wird die gesamte Prozessgruppe beendet (`SysProcAttr.Setpgid`), damit keine Kindprozesse zurückbleiben.
 - stdout = JSON-Report, stderr wird bei Fehler gekürzt (max. 4 KB) als Fehlermeldung gespeichert.
-- Der Parser bildet nur benötigte Felder ab: `Metadata.ImageID`, `Metadata.OS`, `Results[].Target`, `Results[].Class`, `Results[].Type`, `Results[].Vulnerabilities[]` mit `VulnerabilityID`, `PkgName`, `InstalledVersion`, `FixedVersion`, `Severity`, `Status`, `Title`, `PrimaryURL`.
+- Der Parser bildet nur benötigte Felder ab: `Metadata.ImageID`, `Metadata.OS` (Objekt `{Family, Name}`), `Results[].Target`, `Results[].Class`, `Results[].Type`, `Results[].Vulnerabilities[]` mit `VulnerabilityID`, `PkgName`, `PkgPath`, `InstalledVersion`, `FixedVersion`, `Severity`, `Status`, `Title`, `PrimaryURL`.
+- Format-Details aus dem Spike (siehe [spike-results.md](spike-results.md)): `FixedVersion` und `PkgPath` fehlen im JSON, wenn leer; `PkgPath` nennt bei `jar` das betroffene Archiv; `Fingerprint` ist nicht stabil (hängt vom Scan-Ziel ab) und wird nicht verwendet; `Description`, `References` und `CVSS` machen Reports bis 2 MB groß und werden nicht gespeichert.
 - **Scan-Ziel:** die volle Image-ID (`sha256:…`); im Spike bestätigt, Findings identisch zum Scan per Tag. In jedem Fall wird `Metadata.ImageID` gegen die erwartete ID geprüft (Schutz gegen Tag-Wechsel während des Laufs).
 
 ### 4.4 `store`
@@ -254,7 +255,7 @@ CREATE TABLE scans (
     status          TEXT NOT NULL,          -- succeeded | failed | timeout
     started_at      TIMESTAMP NOT NULL,
     duration_ms     INTEGER,
-    os              TEXT,
+    os              TEXT,                   -- "debian 13.7" aus Metadata.OS
     error           TEXT
 );
 CREATE INDEX scans_image_latest ON scans(image_id, status, started_at DESC);
@@ -272,7 +273,8 @@ CREATE TABLE findings (
     title             TEXT,
     primary_url       TEXT,
     target            TEXT NOT NULL,
-    UNIQUE (scan_id, vuln_id, pkg_name, installed_version, target)
+    pkg_path          TEXT NOT NULL DEFAULT '',  -- z. B. betroffenes .jar
+    UNIQUE (scan_id, vuln_id, pkg_name, installed_version, target, pkg_path)
 );
 CREATE INDEX findings_scan_sev ON findings(scan_id, severity_rank DESC);
 
