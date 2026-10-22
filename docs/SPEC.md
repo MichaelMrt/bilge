@@ -210,7 +210,7 @@ Ungültige Werte führen zu einem Fehler beim Start mit klarer Meldung, nicht zu
 |---|---|---|
 | E1 | Keine eigene Auth, LAN-only | Hält bilge schlank; Auth gehört in den Reverse-Proxy. |
 | E2 | Ignores global oder pro Repository | Deckt „betrifft uns nie“ und „in diesem Image irrelevant“ ab, ohne Ablaufdaten-Komplexität. |
-| E3 | Scan direkt per Image, SBOM-Modus später | Trivy cached bereits Layer-Analysen; ob der SBOM-Modus auf dem Pi spürbar spart, wird erst gemessen (Roadmap). |
+| E3 | Scan direkt per Image, **kein SBOM-Modus** | Gemessen: Trivys Layer-Cache verhindert bereits den erneuten Export unveränderter Images; warme Scans dauern < 1 s. |
 | E4 | „Neu“ über Subjekte (`repo:tag`), nicht Image-ID | Verhindert erneute Meldungen bei jedem Image-Update mit gleicher Rest-CVE. |
 | E5 | Baseline-Lauf ohne Detail-Meldung | Vermeidet eine Flut von Discord-Nachrichten beim Einrichten. |
 

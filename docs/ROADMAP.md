@@ -21,7 +21,7 @@
 | 4 | Filter & Ignores | High/Critical, fixbar, Ignore-Regeln |
 | 5 | Discord | Meldung neuer High/Critical-Findings pro Lauf |
 | 6 | Packaging & Release | Multi-Arch-Image auf GHCR, Compose-Beispiel, README → **v1.0** |
-| später | Optimierungen | SBOM-Modus, weitere Notifier, Metriken … |
+| später | Optimierungen | weitere Notifier, Metriken … |
 
 ---
 
@@ -146,7 +146,6 @@ Werkzeug und Anleitung: [`spike/README.md`](../spike/README.md). Ergebnisse: [`s
 
 Priorisierung offen; jeweils erst nach Bedarf und Messung.
 
-- **SBOM-Modus** – SBOM pro Image-ID einmal erzeugen und cachen, täglich nur `trivy sbom` scannen. Nur umsetzen, wenn der Spike zeigt, dass der Layer-Cache von Trivy nicht ausreicht.
 - **Ignores mit Ablaufdatum** – Regel läuft aus, CVE taucht wieder auf.
 - **Weitere Notifier** – ntfy, Gotify, generischer Webhook.
 - **Prometheus-Metriken** – `/metrics` mit Findings je Severity und Laufdauer.
