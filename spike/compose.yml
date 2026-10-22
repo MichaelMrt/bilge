@@ -1,0 +1,34 @@
+# Spike 0.1: Trivy über docker-socket-proxy (nur lesend). Anleitung: README.md
+name: bilge-spike
+
+services:
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy:${PROXY_TAG:-latest}
+    environment:
+      IMAGES: 1
+      POST: 0
+      LOG_LEVEL: info
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [internal]
+
+  trivy:
+    image: aquasec/trivy:${TRIVY_TAG:-latest}
+    profiles: [tools]                 # nur per `docker compose run`
+    entrypoint: ["/bin/sh"]
+    user: "${SPIKE_UID:-1000}:${SPIKE_GID:-1000}"   # wie später: kein Root
+    environment:
+      DOCKER_HOST: tcp://socket-proxy:2375
+      TMPDIR: /cache/tmp
+      HOME: /cache/home
+    volumes:
+      - ./cache:/cache
+      - ./scripts:/spike:ro
+      - ./results:/results
+    networks: [internal, egress]      # egress: Download der Trivy-DB
+    depends_on: [socket-proxy]
+
+networks:
+  internal:
+    internal: true
+  egress: {}

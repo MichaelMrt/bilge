@@ -216,7 +216,7 @@ Ungültige Werte führen zu einem Fehler beim Start mit klarer Meldung, nicht zu
 
 ## 10. Offene Punkte
 
-Werden im Spike (Roadmap Phase 0) geklärt:
+Werden im Spike (Roadmap Phase 0, Werkzeug in `spike/`) geklärt:
 
 - [ ] Funktioniert `trivy image --image-src docker` vollständig über den Proxy mit nur `IMAGES=1` (und den Proxy-Standards `PING`/`VERSION`)?
 - [ ] Akzeptiert Trivy die Image-ID (`sha256:…`) als Scan-Ziel, oder muss ein Tag verwendet werden?

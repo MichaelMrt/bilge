@@ -30,6 +30,9 @@
 **Ziel:** Die riskantesten Annahmen prüfen, bevor Code entsteht, und ein Gerüst schaffen, in dem Claude Code von Anfang an bauen, testen und linten kann.
 
 ### 0.1 Spike: Trivy über den Socket-Proxy
+
+Werkzeug und Anleitung: [`spike/README.md`](../spike/README.md). Lokaler Vortest bestanden, Lauf auf dem Pi offen.
+
 - [ ] Auf dem Pi: `docker-socket-proxy` mit `IMAGES=1`, `POST=0` im internen Netz, daneben ein Container mit `trivy`.
 - [ ] `trivy image --image-src docker` gegen ein Image per Tag **und** per Image-ID testen.
 - [ ] Proxy-Logs prüfen: Welche Endpunkte ruft Trivy auf? Werden welche verweigert?
