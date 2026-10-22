@@ -132,10 +132,11 @@ trivy image
   --skip-db-update
   --skip-java-db-update
   --cache-dir /data/trivy
+  --timeout <BILGE_SCAN_TIMEOUT>
   <imageRef>
 ```
 
-- Aufruf über `exec.CommandContext` mit Argument-Liste (NF-SEC-6), Timeout per Context (F-SCAN-3).
+- Aufruf über `exec.CommandContext` mit Argument-Liste (NF-SEC-6), Timeout per Context (F-SCAN-3). Trivy hat zusätzlich ein eigenes Standard-Timeout von 5 min; `--timeout` wird deshalb auf denselben Wert gesetzt, sonst bricht Trivy große Images auf dem Pi vorzeitig ab.
 - Docker-Endpunkte, die Trivy über den Proxy aufruft (Spike, lokal bestätigt): `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history`, `GET /images/get`. Alle fallen unter `IMAGES=1` bzw. die Proxy-Standards.
 - Umgebung: `DOCKER_HOST` durchreichen, optional `GOMEMLIMIT`, `TMPDIR=/data/tmp` (Trivy schreibt beim Image-Export temporäre Dateien; diese sollen auf das Volume, nicht in RAM/tmpfs).
 - Niedrige Priorität per `syscall.Setpriority` direkt nach dem Start des Prozesses (das distroless-Image enthält kein `nice`-Binary).
