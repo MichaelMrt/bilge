@@ -13,7 +13,20 @@ SPIKE_GID=$(id -g)
 
 mkdir -p cache/tmp cache/home results/reports
 exec > >(tee results/console.log) 2>&1
-trap 'docker compose down >/dev/null 2>&1 || true' EXIT
+
+# `docker compose down` leaves running one-off `run` containers behind, so
+# remove every container of the project first (also on Ctrl+C).
+cleanup() {
+	local ids
+	ids=$(docker ps -aq --filter label=com.docker.compose.project=bilge-spike)
+	if [[ -n "$ids" ]]; then
+		# shellcheck disable=SC2086 # word splitting of the ID list is intended
+		docker rm -f $ids >/dev/null 2>&1 || true
+	fi
+	docker compose --profile tools down >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+trap 'echo; echo "Aborted, cleaning up ..."; exit 130' INT TERM
 
 printf 'label\texit\tseconds\tpeak_rss_mb\tvulns\timage_id\n' >results/measurements.tsv
 printf 'image\tid\tsize_mb\n' >results/images.tsv
