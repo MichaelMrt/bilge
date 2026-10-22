@@ -137,13 +137,13 @@ trivy image
 ```
 
 - Aufruf über `exec.CommandContext` mit Argument-Liste (NF-SEC-6), Timeout per Context (F-SCAN-3). Trivy hat zusätzlich ein eigenes Standard-Timeout von 5 min; `--timeout` wird deshalb auf denselben Wert gesetzt, sonst bricht Trivy große Images auf dem Pi vorzeitig ab.
-- Docker-Endpunkte, die Trivy über den Proxy aufruft (Spike, lokal bestätigt): `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history`, `GET /images/get`. Alle fallen unter `IMAGES=1` bzw. die Proxy-Standards.
-- Umgebung: `DOCKER_HOST` durchreichen, optional `GOMEMLIMIT`, `TMPDIR=/data/tmp` (Trivy schreibt beim Image-Export temporäre Dateien; diese sollen auf das Volume, nicht in RAM/tmpfs).
+- Docker-Endpunkte, die Trivy über den Proxy aufruft (Spike auf dem Pi bestätigt): `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history`, `GET /images/get`. Alle fallen unter `IMAGES=1` bzw. die Proxy-Standards.
+- Umgebung: `DOCKER_HOST` durchreichen, optional `GOMEMLIMIT` (einziges wirksames Speicherlimit: Raspberry Pi OS schaltet den Memory-Controller der cgroups ab, `mem_limit` in Compose greift dort nicht), `TMPDIR=/data/tmp` (Trivy schreibt beim Image-Export temporäre Dateien; diese sollen auf das Volume, nicht in RAM/tmpfs).
 - Niedrige Priorität per `syscall.Setpriority` direkt nach dem Start des Prozesses (das distroless-Image enthält kein `nice`-Binary).
 - Beim Abbruch wird die gesamte Prozessgruppe beendet (`SysProcAttr.Setpgid`), damit keine Kindprozesse zurückbleiben.
 - stdout = JSON-Report, stderr wird bei Fehler gekürzt (max. 4 KB) als Fehlermeldung gespeichert.
 - Der Parser bildet nur benötigte Felder ab: `Metadata.ImageID`, `Metadata.OS`, `Results[].Target`, `Results[].Class`, `Results[].Type`, `Results[].Vulnerabilities[]` mit `VulnerabilityID`, `PkgName`, `InstalledVersion`, `FixedVersion`, `Severity`, `Status`, `Title`, `PrimaryURL`.
-- **Scan-Ziel:** die volle Image-ID (`sha256:…`); im Spike lokal bestätigt. In jedem Fall wird `Metadata.ImageID` gegen die erwartete ID geprüft (Schutz gegen Tag-Wechsel während des Laufs).
+- **Scan-Ziel:** die volle Image-ID (`sha256:…`); im Spike bestätigt, Findings identisch zum Scan per Tag. In jedem Fall wird `Metadata.ImageID` gegen die erwartete ID geprüft (Schutz gegen Tag-Wechsel während des Laufs).
 
 ### 4.4 `store`
 
@@ -377,7 +377,7 @@ Der Proxy hängt **nur** am internen Netz (NF-SEC-2). bilge braucht zusätzlich 
 | Risiko | Gegenmaßnahme |
 |---|---|
 | Trivy braucht über den Proxy mehr Endpunkte als erwartet | Spike in Phase 0, bevor Code entsteht |
-| Trivy-Speicherspitzen auf dem Pi (OOM) | Sequenzielle Scans, `nice`, `GOMEMLIMIT`, Doku zu Swap/RAM |
-| Große Volumes durch Java-DB und Layer-Cache | `BILGE_JAVA_DB` abschaltbar, Größen dokumentieren |
+| Trivy-Speicherspitzen auf dem Pi (OOM) | Gemessen ≤ 260 MB, Risiko gering; sequenzielle Scans, `GOMEMLIMIT` |
+| Große Volumes durch Trivy- und Java-DB | Gemessen ca. 3 GB; im README dokumentieren |
 | Änderungen im Trivy-JSON-Format | Trivy-Version im Dockerfile pinnen, Parser-Fixtures bei Upgrade erneuern |
 | Dashboard versehentlich öffentlich | Deutlicher Hinweis im README, Reverse-Proxy-Beispiel |

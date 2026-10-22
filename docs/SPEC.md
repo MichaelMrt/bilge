@@ -165,8 +165,8 @@ Konsequenzen (gewollt):
 ### 7.2 Ressourcen & Plattform
 
 - **NF-RES-1** bilge selbst braucht im Leerlauf ≤ 30 MB RAM (Ziel: 10–20 MB).
-- **NF-RES-2** Während eines Scans darf Trivy kurzzeitig mehr Speicher nutzen; Empfehlung: Pi mit ≥ 4 GB RAM. Trivy läuft mit niedriger CPU-Priorität und optional mit `GOMEMLIMIT`. Temporäre Dateien landen auf dem Volume, nicht im RAM.
-- **NF-RES-3** Speicherbedarf des Volumes: Trivy-DB, optional Java-DB und Layer-Cache, zusammen einige GB. Die genauen Werte werden im Spike (Roadmap Phase 0) gemessen und im README dokumentiert.
+- **NF-RES-2** Während eines Scans darf Trivy kurzzeitig mehr Speicher nutzen; Gemessen: höchstens ca. 260 MB (Jenkins-Image, kalter Cache); Empfehlung daher Pi mit ≥ 2 GB RAM. Trivy läuft mit niedriger CPU-Priorität und optional mit `GOMEMLIMIT`. Temporäre Dateien landen auf dem Volume, nicht im RAM.
+- **NF-RES-3** Speicherbedarf des Volumes: Trivy-DB ca. 1,5 GB, Java-DB ca. 1,5 GB, Layer-Cache wenige MB; zusammen ca. 3 GB plus Reserve. Wird im README dokumentiert.
 - **NF-PLAT-1** Container-Images für `linux/arm64` (primär) und `linux/amd64`.
 - **NF-PLAT-2** Ein einzelnes statisches Go-Binary ohne CGO, Frontend eingebettet.
 
@@ -218,10 +218,12 @@ Ungültige Werte führen zu einem Fehler beim Start mit klarer Meldung, nicht zu
 
 Werden im Spike (Roadmap Phase 0, Werkzeug in `spike/`) geklärt:
 
-- [ ] Funktioniert `trivy image --image-src docker` vollständig über den Proxy mit nur `IMAGES=1` (und den Proxy-Standards `PING`/`VERSION`)?
-- [ ] Akzeptiert Trivy die Image-ID (`sha256:…`) als Scan-Ziel, oder muss ein Tag verwendet werden?
+- [x] Funktioniert `trivy image --image-src docker` vollständig über den Proxy mit nur `IMAGES=1` (und den Proxy-Standards `PING`/`VERSION`)?
+- [x] Akzeptiert Trivy die Image-ID (`sha256:…`) als Scan-Ziel, oder muss ein Tag verwendet werden?
 - [ ] Verhalten von Trivy ohne Java-DB, wenn `BILGE_JAVA_DB=false`.
-- [ ] RAM-Spitze, Dauer und Volume-Größe auf dem Pi für typische Images (Alpine, Debian, Node, Java).
-- [ ] Wie viel spart ein zweiter Scan desselben Images durch Trivys Layer-Cache? (Entscheidungsgrundlage für den SBOM-Modus.)
+- [x] RAM-Spitze, Dauer und Volume-Größe auf dem Pi für typische Images (Alpine, Debian, Node, Java).
+- [x] Wie viel spart ein zweiter Scan desselben Images durch Trivys Layer-Cache? (Entscheidungsgrundlage für den SBOM-Modus.)
 
-**Zwischenstand** (lokaler Vortest am 2026-10-22, Mac arm64, Docker 29.8.2, Trivy 0.76.1, nur `alpine`): Proxy mit `IMAGES=1` genügt, nichts wurde verweigert; volle und kurze Image-ID funktionieren als Scan-Ziel; bei gefülltem Cache exportiert Trivy das Image nicht erneut; die Trivy-DB ist entpackt ca. 1,5 GB groß. Auf dem Pi noch zu bestätigen.
+**Ergebnis** (Pi 5, 2026-10-22, Details in [spike-results.md](spike-results.md)): Proxy mit `IMAGES=1` genügt; volle und kurze Image-ID funktionieren; RAM-Spitze ≤ 260 MB, Scans in Sekunden, Volume ca. 3 GB; ein warmer Cache verhindert erneute Image-Exporte.
+
+**Offen:** Ohne vorhandene Java-DB bricht Trivy bei Images mit `.jar`-Dateien komplett ab. `BILGE_JAVA_DB=false` (F-DB-2) ist so nicht umsetzbar; Entscheidung steht aus.
