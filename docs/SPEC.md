@@ -223,3 +223,5 @@ Werden im Spike (Roadmap Phase 0, Werkzeug in `spike/`) geklärt:
 - [ ] Verhalten von Trivy ohne Java-DB, wenn `BILGE_JAVA_DB=false`.
 - [ ] RAM-Spitze, Dauer und Volume-Größe auf dem Pi für typische Images (Alpine, Debian, Node, Java).
 - [ ] Wie viel spart ein zweiter Scan desselben Images durch Trivys Layer-Cache? (Entscheidungsgrundlage für den SBOM-Modus.)
+
+**Zwischenstand** (lokaler Vortest am 2026-10-22, Mac arm64, Docker 29.8.2, Trivy 0.76.1, nur `alpine`): Proxy mit `IMAGES=1` genügt, nichts wurde verweigert; volle und kurze Image-ID funktionieren als Scan-Ziel; bei gefülltem Cache exportiert Trivy das Image nicht erneut; die Trivy-DB ist entpackt ca. 1,5 GB groß. Auf dem Pi noch zu bestätigen.

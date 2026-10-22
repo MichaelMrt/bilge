@@ -136,12 +136,13 @@ trivy image
 ```
 
 - Aufruf über `exec.CommandContext` mit Argument-Liste (NF-SEC-6), Timeout per Context (F-SCAN-3).
+- Docker-Endpunkte, die Trivy über den Proxy aufruft (Spike, lokal bestätigt): `HEAD /_ping`, `GET /images/{ref}/json`, `GET /images/{ref}/history`, `GET /images/get`. Alle fallen unter `IMAGES=1` bzw. die Proxy-Standards.
 - Umgebung: `DOCKER_HOST` durchreichen, optional `GOMEMLIMIT`, `TMPDIR=/data/tmp` (Trivy schreibt beim Image-Export temporäre Dateien; diese sollen auf das Volume, nicht in RAM/tmpfs).
 - Niedrige Priorität per `syscall.Setpriority` direkt nach dem Start des Prozesses (das distroless-Image enthält kein `nice`-Binary).
 - Beim Abbruch wird die gesamte Prozessgruppe beendet (`SysProcAttr.Setpgid`), damit keine Kindprozesse zurückbleiben.
 - stdout = JSON-Report, stderr wird bei Fehler gekürzt (max. 4 KB) als Fehlermeldung gespeichert.
 - Der Parser bildet nur benötigte Felder ab: `Metadata.ImageID`, `Metadata.OS`, `Results[].Target`, `Results[].Class`, `Results[].Type`, `Results[].Vulnerabilities[]` mit `VulnerabilityID`, `PkgName`, `InstalledVersion`, `FixedVersion`, `Severity`, `Status`, `Title`, `PrimaryURL`.
-- **Scan-Ziel:** bevorzugt die Image-ID; falls der Spike zeigt, dass Trivy das nicht unterstützt, der erste `repo:tag`. In jedem Fall wird `Metadata.ImageID` gegen die erwartete ID geprüft (Schutz gegen Tag-Wechsel während des Laufs).
+- **Scan-Ziel:** die volle Image-ID (`sha256:…`); im Spike lokal bestätigt. In jedem Fall wird `Metadata.ImageID` gegen die erwartete ID geprüft (Schutz gegen Tag-Wechsel während des Laufs).
 
 ### 4.4 `store`
 
