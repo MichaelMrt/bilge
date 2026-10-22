@@ -69,6 +69,16 @@ Optional in einem zweiten Terminal den Speicher des ganzen Pi beobachten:
 watch -n 2 free -m
 ```
 
+### Abbrechen
+
+Jederzeit mit **Strg+C**. Das Skript beendet den laufenden Trivy-Scan, entfernt Proxy, Container und Netzwerke und endet mit `Aborted, cleaning up ...`.
+
+Bei einem neuen Start werden die bisherigen Ergebnisse in `results/` überschrieben. Bereits geladene Images werden nicht erneut heruntergeladen. Wer die Teilergebnisse behalten will, benennt den Ordner vorher um:
+
+```bash
+mv results results-abgebrochen
+```
+
 ## 3. Was das Skript tut
 
 1. Systeminfos sammeln (Modell, Kernel, RAM, Speicherplatz, Docker-Version, cgroup)
@@ -95,8 +105,10 @@ Das Archiv enthält: `console.log` (komplette Ausgabe), `measurements.tsv`, `ima
 
 ## 5. Aufräumen auf dem Pi
 
+Das Skript räumt Container und Netzwerke am Ende selbst weg. Falls doch etwas übrig bleibt:
+
 ```bash
-docker compose down
+docker compose --profile tools down
 ```
 
 ```bash
