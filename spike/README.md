@@ -63,6 +63,18 @@ Weitere Variablen:
 | `TRIVY_TAG` | `latest` | Version von `aquasec/trivy` |
 | `PROXY_TAG` | `latest` | Version von `tecnativa/docker-socket-proxy` |
 
+### Fortschritt
+
+Während des Laufs zeigt die letzte Zeile, wie weit das Skript ist:
+
+```
+[#####...............] 7/24  1:23  (total 12:40)  scan jenkins/jenkins:lts by tag, cold cache
+```
+
+Der Balken zählt die langen Schritte (Pulls, DB-Downloads, Scans), nicht die Zeit. Die Schritte dauern sehr unterschiedlich lange, ein schneller Balken am Anfang heißt also nicht, dass der Rest genauso schnell geht. Daneben stehen die Laufzeit des aktuellen Schritts und die Gesamtzeit. Fertige Schritte bleiben als `[7/24] … (1:23)` stehen.
+
+Die Live-Zeile erscheint nur im Terminal, nicht in `results/console.log`. Mit `nohup` oder umgeleiteter Ausgabe entfällt sie.
+
 Optional in einem zweiten Terminal den Speicher des ganzen Pi beobachten:
 
 ```bash
