@@ -70,9 +70,8 @@ bilge/
 │   ├── src/
 │   ├── embed.go          //go:embed all:dist
 │   └── dist/             Build-Ausgabe (Platzhalter-index.html eingecheckt)
-├── deploy/
-│   └── docker-compose.yml  Beispiel mit socket-proxy
 ├── docs/                 SPEC, ARCHITECTURE, ROADMAP
+├── compose.yml           Beispiel-Deployment mit socket-proxy
 ├── Dockerfile
 ├── Makefile
 └── CLAUDE.md
@@ -315,7 +314,7 @@ Der „aktuelle Stand“ eines Images (SPEC §6.3) ist der neueste `scans`-Eintr
 
 Multi-Arch-Build über `docker buildx` für `linux/arm64,linux/amd64`; Veröffentlichung auf GHCR per GitHub Actions.
 
-### 7.2 Compose-Beispiel
+### 7.2 Compose-Beispiel (`compose.yml` im Projekt-Root)
 
 ```yaml
 services:
@@ -369,7 +368,7 @@ Der Proxy hängt **nur** am internen Netz (NF-SEC-2). bilge braucht zusätzlich 
 | Orchestrator | Lauf inkl. Fehlerfällen | Fakes für `docker.Client`, `trivy.Scanner`, `notify.Notifier` |
 | API | Handler | `httptest` gegen echten Store mit Testdaten |
 | Frontend | Filter-Logik, Formatierung | Vitest (nur wo Logik steckt) |
-| End-to-End | Gesamtsystem | `deploy/docker-compose.yml` lokal + Smoke-Test-Skript |
+| End-to-End | Gesamtsystem | `compose.yml` lokal + Smoke-Test-Skript |
 
 ## 9. Bekannte Risiken
 

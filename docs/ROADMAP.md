@@ -130,7 +130,7 @@
 
 - [ ] **6.1 Dockerfile** – Multi-Stage laut ARCHITECTURE §7.1, Trivy-Version gepinnt, distroless, non-root.
 - [ ] **6.2 Multi-Arch-Release** – GitHub Actions mit `buildx` für arm64/amd64, Push nach GHCR bei Tags, SemVer.
-- [ ] **6.3 `deploy/docker-compose.yml`** – Beispiel laut ARCHITECTURE §7.2, getestet auf dem Pi.
+- [ ] **6.3 `compose.yml`** (Projekt-Root) – Beispiel laut ARCHITECTURE §7.2, getestet auf dem Pi.
 - [ ] **6.4 Ressourcen prüfen** – RAM im Leerlauf ≤ 30 MB (NF-RES-1), read-only Root-FS funktioniert.
 - [ ] **6.5 README** – Was/Warum, Schnellstart, Konfiguration, Sicherheitsmodell, Hinweis zu Reverse-Proxy/Auth, Ressourcenbedarf aus dem Spike, Screenshots.
 - [ ] **6.6 Smoke-Test** – Skript, das Compose hochfährt, einen Lauf auslöst und `/api/status` prüft.
