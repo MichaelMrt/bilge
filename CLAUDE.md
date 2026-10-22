@@ -60,7 +60,7 @@ go test ./internal/scan/ -run TestNewFindings   # einzelnen Test ausführen
 2. Bei nicht-trivialen Aufgaben erst einen Plan vorlegen.
 3. Implementieren in kleinen Schritten; `make test lint` muss grün sein.
 4. Roadmap-Checkbox abhaken, ggf. SPEC/ARCHITECTURE aktualisieren.
-5. Commits auf Englisch im Imperativ, ein logischer Schritt pro Commit (z. B. `Add trivy JSON parser`).
+5. Commits nach [Conventional Commits](https://www.conventionalcommits.org/), atomar (ein logischer Schritt pro Commit), nur Titel ohne Body, Englisch im Imperativ (z. B. `feat(trivy): add JSON report parser`). Gemischte Änderungen auf mehrere Commits aufteilen.
 
 ## Sprache
 
